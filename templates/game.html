@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <title>Игровая комната</title>
+</head>
+<body>
+  <h2>Комната: {{ room_code }}</h2>
+
+  <!-- Тут будет чат и игровая логика -->
+
+  <script>
+    const roomCode = "{{ room_code }}";
+    console.log("Подключаемся к комнате", roomCode);
+    // Можно тут реализовать WebSocket подключение к комнате с roomCode
+  </script>
+</body>
+</html>

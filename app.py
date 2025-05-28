@@ -44,10 +44,23 @@ def process_question(q):
 @app.route('/')
 def index():
     return render_template('index.html')
+    
+@app.route('/room_setup')
+def room_setup():
+    return render_template('room_setup.html')
 
 @app.route('/game/<mode>')
 def game_mode(mode):
     return render_template('game_mode.html', mode=mode)
+    
+@app.route('/game')
+def game():
+    room_code = request.args.get('room')
+    if not room_code:
+        return "Ошибка: не указан код комнаты", 400
+    # Передаем код комнаты в шаблон, чтобы использовать в JS для WebSocket и логики
+    return render_template('game.html', room_code=room_code)
+
 
 @app.route('/ask', methods=['POST'])
 def ask():
