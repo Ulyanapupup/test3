@@ -1,0 +1,14 @@
+<!-- templates/game.html -->
+<h2>Игра в режиме {{ submode }}</h2>
+<p>Комната: {{ room_code }}</p>
+<div id="chat"></div>
+<input id="message" placeholder="Введите сообщение">
+<button onclick="sendMessage()">Отправить</button>
+<script src="//cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.min.js"></script>
+<script>
+  const socket = io();
+  function sendMessage() {
+    const msg = document.getElementById('message').value;
+    socket.send(msg);
+  }
+</script>

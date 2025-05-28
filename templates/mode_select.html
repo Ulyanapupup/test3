@@ -1,0 +1,7 @@
+<!-- templates/mode_select.html -->
+<h2>Выбери подрежим</h2>
+<form action="/room" method="post">
+  {% for code, text in submodes.items() %}
+    <button name="submode" value="{{ code }}">{{ text }}</button>
+  {% endfor %}
+</form>
