@@ -1,64 +1,28 @@
+<!-- templates/room_setup.html -->
 <!DOCTYPE html>
-<html lang="ru">
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <title>Настройка комнаты</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <title>Создать или войти в комнату</title>
 </head>
 <body>
-  <h2>Игровая комната</h2>
+  <h1>Игровая комната</h1>
+  <form action="/game" method="get">
+    <label>Введите код комнаты:</label>
+    <input type="text" name="room" required>
+    <button type="submit">Войти</button>
+  </form>
 
-  <div>
-    <button id="createRoomBtn">Создать комнату</button>
-    <input type="text" id="roomCodeDisplay" readonly placeholder="Код комнаты появится здесь" />
-    <button id="joinRoomBtn" disabled>Подключиться к комнате</button>
-  </div>
+  <br>
 
-  <hr>
-
-  <div>
-    <input type="text" id="roomCodeInput" placeholder="Введите код комнаты" />
-    <button id="connectBtn">Подключиться</button>
-  </div>
+  <form id="createForm" action="/game" method="get">
+    <input type="hidden" name="room" id="generatedRoomCode">
+    <button type="submit">Создать случайную комнату</button>
+  </form>
 
   <script>
-    // Генерация простого кода комнаты (например, 6 символов A-Z, 0-9)
-    function generateRoomCode(length = 6) {
-      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-      let code = '';
-      for(let i = 0; i < length; i++) {
-        code += chars.charAt(Math.floor(Math.random() * chars.length));
-      }
-      return code;
-    }
-
-    const createBtn = document.getElementById('createRoomBtn');
-    const roomCodeDisplay = document.getElementById('roomCodeDisplay');
-    const joinRoomBtn = document.getElementById('joinRoomBtn');
-    const roomCodeInput = document.getElementById('roomCodeInput');
-    const connectBtn = document.getElementById('connectBtn');
-
-    createBtn.addEventListener('click', () => {
-      const newCode = generateRoomCode();
-      roomCodeDisplay.value = newCode;
-      joinRoomBtn.disabled = false;
-    });
-
-    joinRoomBtn.addEventListener('click', () => {
-      if(roomCodeDisplay.value) {
-        // Переходим на страницу игры с переданным кодом комнаты
-        window.location.href = `/game?room=${roomCodeDisplay.value}`;
-      }
-    });
-
-    connectBtn.addEventListener('click', () => {
-      const code = roomCodeInput.value.trim().toUpperCase();
-      if(code) {
-        // Переходим на страницу игры с введённым кодом комнаты
-        window.location.href = `/game?room=${code}`;
-      } else {
-        alert('Пожалуйста, введите код комнаты');
-      }
+    document.getElementById('createForm').addEventListener('submit', function(e) {
+      const roomCode = Math.random().toString(36).substr(2, 6).toUpperCase();
+      document.getElementById('generatedRoomCode').value = roomCode;
     });
   </script>
 </body>
