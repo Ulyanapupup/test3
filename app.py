@@ -1,45 +1,63 @@
-from flask import Flask, render_template, request, redirect, url_for, session
+from flask import Flask, render_template, request, jsonify
 from flask_socketio import SocketIO, send
-import os, json, re, string
+import json, re, string, os
 import eventlet
 eventlet.monkey_patch()
 
 app = Flask(__name__)
-app.secret_key = 'secret123'  # нужна для session
 socketio = SocketIO(app, cors_allowed_origins="*")
 
-@app.route('/', methods=['GET'])
+# Загадано число
+secret_number = 17
+
+def is_greater(x): return secret_number > x
+def is_less(x): return secret_number < x
+def is_equal(x): return secret_number == x
+def is_prime(_=None):
+    if secret_number < 2: return False
+    for i in range(2, int(secret_number ** 0.5) + 1):
+        if secret_number % i == 0: return False
+    return True
+
+question_functions = {
+    "is_greater": is_greater,
+    "is_less": is_less,
+    "is_equal": is_equal,
+    "is_prime": is_prime
+}
+
+with open('questions.json', 'r', encoding='utf-8') as f:
+    question_map = json.load(f)
+
+def process_question(q):
+    q = q.lower().translate(str.maketrans('', '', string.punctuation))
+    for keyword, func_name in question_map.items():
+        if keyword in q:
+            func = question_functions[func_name]
+            if func_name == "is_prime":
+                return "Да" if func() else "Нет"
+            nums = re.findall(r'\d+', q)
+            if not nums: return "Пожалуйста, укажите число"
+            return "Да" if func(int(nums[0])) else "Нет"
+    return "Неизвестный вопрос"
+
+@app.route('/')
 def index():
     return render_template('index.html')
 
-@app.route('/mode', methods=['POST'])
-def mode_select():
-    mode = request.form['mode']
-    session['mode'] = mode
-    submodes = {
-        "1.1": "Система загадывает число, пользователь задаёт вопросы",
-        "1.2": "Система задаёт вопросы пользователю",
-        "2.1": "Один игрок загадывает число, другой задаёт вопросы",
-        "2.2": "Игроки по очереди играют"
-    }
-    submodes = {k: v for k, v in submodes.items() if k.startswith("1") if mode == "computer" else k.startswith("2")}
-    return render_template('mode_select.html', submodes=submodes)
+@app.route('/game/<mode>')
+def game_mode(mode):
+    return render_template('game_mode.html', mode=mode)
 
-@app.route('/room', methods=['POST'])
-def room_setup():
-    session['submode'] = request.form['submode']
-    return render_template('room_setup.html')
-
-@app.route('/game', methods=['POST'])
-def game():
-    session['room_code'] = request.form['room_code']
-    session['action'] = request.form['action']
-    return render_template('game.html', submode=session['submode'], room_code=session['room_code'])
+@app.route('/ask', methods=['POST'])
+def ask():
+    question = request.json.get("question", "")
+    answer = process_question(question)
+    return jsonify({"answer": answer})
 
 @socketio.on('message')
 def handle_message(msg):
-    print("Сообщение:", msg)
     send(msg, broadcast=True)
 
 if __name__ == '__main__':
-    socketio.run(app, host='0.0.0.0', port=int(os.environ.get("PORT", 5000)))
+    socketio.run(app, host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
