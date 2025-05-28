@@ -4,6 +4,9 @@ import json, re, string, os
 import eventlet
 eventlet.monkey_patch()
 
+from flask import Flask, render_template, request
+from flask_socketio import SocketIO
+
 app = Flask(__name__)
 socketio = SocketIO(app, cors_allowed_origins="*")
 
