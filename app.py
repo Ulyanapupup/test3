@@ -47,11 +47,14 @@ def index():
     
 @app.route('/room_setup')
 def room_setup():
-    return render_template('room_setup.html')
+    return render_template('room_setup.html', mode=mode)
 
 @app.route('/game/<mode>')
 def game_mode(mode):
+    if mode in ['2.1', '2.2']:
+        return render_template('room_setup.html', mode=mode)
     return render_template('game_mode.html', mode=mode)
+
     
 @app.route('/game')
 def game():
